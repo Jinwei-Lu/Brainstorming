@@ -26,7 +26,7 @@ The local `main` branch tracks `origin/main`.
 - Remote name: `origin`
 - Default working branch: `main`
 - Upstream branch: `origin/main`
-- Local project content is intended to be committed and pushed to the upstream branch.
+- The plugin scaffold and this project record are committed on `main` and synchronized with `origin/main`.
 
 ## Routine synchronization
 
