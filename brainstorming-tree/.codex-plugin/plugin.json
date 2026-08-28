@@ -1,0 +1,19 @@
+{
+  "name": "brainstorming-tree",
+  "version": "0.1.0",
+  "description": "Brainstorming Tree plugin",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Brainstorming Tree",
+    "shortDescription": "Use Brainstorming Tree in Codex.",
+    "longDescription": "Brainstorming Tree adds a local Codex plugin scaffold.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Help me use Brainstorming Tree."
+  },
+  "mcpServers": "./.mcp.json"
+}
