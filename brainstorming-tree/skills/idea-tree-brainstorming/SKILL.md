@@ -5,6 +5,10 @@ description: Run multi-round brainstorming as a durable, MCTS-inspired idea tree
 
 # Idea-tree brainstorming
 
+## Compatibility
+
+This skill is agent-agnostic. It requires a host that can load an Agent Skills-compatible `SKILL.md` file and connect to the bundled standard-input MCP server. Host-specific manifests, permissions, launch configuration, and installation paths belong in thin runtime adapters rather than in this skill.
+
 Treat the local idea-tree database as the single source of truth. Chat text is commentary, not state. Never rely on remembered node names, scores, versions, or verdicts when the tools can read them.
 
 ## Start or resume

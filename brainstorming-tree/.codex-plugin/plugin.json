@@ -1,7 +1,7 @@
 {
   "name": "brainstorming-tree",
   "version": "0.1.0",
-  "description": "Lightweight Codex plugin for durable, MCTS-inspired brainstorming. It persists ideas as an auditable tree so long-running LLM discussions survive context loss and interference.",
+  "description": "Lightweight Agent Plugin for durable, MCTS-inspired brainstorming. It persists ideas as an auditable tree so long-running agent workflows survive context loss and interference.",
   "author": {
     "name": "Jinwei Lu",
     "url": "https://github.com/Jinwei-Lu"
@@ -11,6 +11,8 @@
   "license": "MIT",
   "keywords": [
     "brainstorming",
+    "agent-plugin",
+    "agent-skills",
     "idea-tree",
     "mcts",
     "llm",
@@ -21,8 +23,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Brainstorming Tree",
-    "shortDescription": "Durable, MCTS-inspired brainstorming",
-    "longDescription": "Moves brainstorming state out of model context into a local, auditable idea tree. Codex can resume long explorations, preserve failed branches, and allocate attention with an evidence-gated MCTS-inspired loop.",
+    "shortDescription": "Agent-agnostic, durable brainstorming",
+    "longDescription": "Moves brainstorming state out of model context into a local, auditable idea tree. Compatible agents can resume long explorations, preserve failed branches, and allocate attention with an evidence-gated MCTS-inspired loop.",
     "developerName": "Jinwei Lu",
     "category": "Productivity",
     "capabilities": [

@@ -2,9 +2,9 @@
 
 [简体中文](README_zh.md) | English
 
-**A lightweight Codex plugin for durable, MCTS-inspired brainstorming.** It persists ideas as an auditable tree so long-running LLM discussions can survive context loss, interference, and interruption.
+**A lightweight Agent Plugin for durable, MCTS-inspired brainstorming.** It persists ideas as an auditable tree so long-running agent workflows can survive context loss, interference, and interruption.
 
-> **Status:** early development (`v0.1.0`). The manifest, behavioral skill, dependency-free local MCP server, and SQLite state engine have a first working implementation. A minimal persistence and backpropagation check passes, but packaging, compatibility testing, and real-world validation are still pending.
+> **Status:** early development (`v0.1.0`). The agent-agnostic durable core is implemented and its focused state-transition and protocol checks pass. Cross-agent packaging and validation on a long real-world brainstorming project are still pending.
 
 ## Why this project exists
 
@@ -14,17 +14,18 @@ Brainstorming Tree moves that state out of conversational memory. The conversati
 
 ## The approach
 
-The plugin combines three deliberately small pieces:
+The Agent Plugin combines four deliberately small pieces:
 
-1. **A Codex skill** defines a disciplined loop for selecting, expanding, evaluating, and synthesizing ideas.
-2. **A local MCP server** exposes typed tree operations instead of relying on the model to rewrite prose consistently.
+1. **A portable Agent Skill** defines a disciplined loop for selecting, expanding, evaluating, and synthesizing ideas.
+2. **A local MCP server** exposes typed tree operations instead of relying on a model to rewrite prose consistently.
 3. **A SQLite database** stores nodes, lineage, evaluations, versions, and an operation history under the current workspace.
+4. **Thin runtime adapters** connect the same core to the packaging and configuration conventions of individual agent hosts.
 
 ```text
 User goal
    │
    ▼
-Codex + brainstorming skill
+Agent + portable brainstorming skill
    │  typed operations
    ▼
 Local MCP server
@@ -33,7 +34,18 @@ Local MCP server
 <workspace>/.idea-tree/ideas.sqlite3
 ```
 
-The planned runtime is local-first and uses Python's standard library. No cloud service, account, embedding model, or second LLM is required for the core loop.
+The runtime is local-first and uses Python's standard library. No cloud service, account, embedding model, or second LLM is required for the core loop.
+
+## Cross-agent compatibility
+
+The portable core is built on two open interfaces:
+
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/specification/2025-11-25) for typed tools and host–server communication.
+- [Agent Skills](https://agentskills.io/specification) for the `SKILL.md` behavior contract.
+
+“Agent Plugin” describes the product boundary: the state engine, MCP tools, and brainstorming behavior are not owned by one agent product. It does **not** mean that every agent can install the same package with zero configuration. Each host must support the relevant open interface and may need a small adapter for its own manifest, launch command, permissions, or installation path.
+
+The current repository includes a `.codex-plugin/plugin.json` manifest as the first adapter. It is a compatibility layer, not the identity or architectural boundary of the project. Additional adapters should remain thin and must reuse the same MCP server and Agent Skill.
 
 ## MCTS, adapted for real brainstorming
 
@@ -61,14 +73,15 @@ Scores guide exploration; they are not truth, confidence, or proof. Failed ideas
 
 | Component | Status |
 | --- | --- |
-| Plugin manifest and metadata | Scaffolded |
-| Idea-tree brainstorming skill | First draft complete |
-| Local MCP server | First implementation complete |
-| SQLite schema and tree operations | First implementation complete |
-| End-to-end persistence and backpropagation check | Minimal check passed |
-| Marketplace packaging and user installation guide | Pending |
+| Plugin manifest and metadata | Validator passed |
+| Idea-tree brainstorming skill | Validator passed |
+| Local MCP server | Core implementation complete |
+| SQLite schema and 13 tree operations | Core implementation complete |
+| Focused CRUD, backpropagation, invalidation, and protocol checks | Passed |
+| First runtime adapter | Codex manifest available |
+| Additional agent adapters and installation guides | Pending |
 
-Until packaging, compatibility checks, and real-world trials are complete, treat the repository as an experimental plugin rather than a production-ready tool.
+Until cross-agent packaging and real-world trials are complete, treat the repository as an experimental Agent Plugin rather than a production-ready tool.
 
 ## Repository layout
 
@@ -77,17 +90,17 @@ Until packaging, compatibility checks, and real-world trials are complete, treat
 ├── README.md
 ├── README_zh.md
 ├── brainstorming-tree/
-│   ├── .codex-plugin/plugin.json     # Plugin manifest
+│   ├── .codex-plugin/plugin.json     # First runtime adapter: Codex
 │   ├── .mcp.json                     # Local MCP server declaration
 │   ├── skills/
-│   │   └── idea-tree-brainstorming/  # Agent behavior and state rules
-│   └── scripts/                      # State engine and MCP server (in progress)
+│   │   └── idea-tree-brainstorming/  # Portable Agent Skill and state rules
+│   └── scripts/                      # State engine and MCP server
 └── docs/important-information/       # Local decisions and project state (Git-ignored)
 ```
 
 ## Planned user flow
 
-1. Give Codex a problem, decision, or open-ended idea.
+1. Give a compatible agent a problem, decision, or open-ended idea.
 2. Create a tree with an immutable goal and explicit success and stop conditions.
 3. Let the plugin select a branch, add a distinct candidate, and attach evidence-backed evaluations.
 4. Resume the same tree in a later session without reconstructing it from chat history.
@@ -101,12 +114,13 @@ Until packaging, compatibility checks, and real-world trials are complete, treat
 - [x] Add SQLite-backed tree, node, evaluation, selection, history, and snapshot operations.
 - [x] Demonstrate persistence and ancestor backpropagation in a minimal end-to-end check.
 - [x] Pass the plugin manifest and skill validators.
-- [ ] Add focused checks for version conflicts, tombstones, invalidation, and JSON-RPC compatibility.
-- [ ] Package the plugin and document local Codex installation.
+- [x] Check version conflicts, tombstones, invalidation, and both JSON-RPC lifecycle paths.
+- [ ] Document the portable core contract and package thin adapters for supported agent runtimes.
 
 ### Later, only when evidence justifies it
 
 - Improve ranking and evaluation calibration from real usage traces.
+- Add and verify runtime adapters based on actual user demand.
 - Add import/export and compact human-readable reports.
 - Explore visualization, collaboration, or remote synchronization without weakening the local core.
 
