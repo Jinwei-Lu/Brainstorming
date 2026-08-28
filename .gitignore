@@ -1,0 +1,13 @@
+# Local project notes requested by the repository owner.
+/docs/
+
+# Local brainstorming state may contain private project content.
+.idea-tree/
+
+# Python development artifacts.
+__pycache__/
+*.py[cod]
+.venv/
+
+# macOS metadata.
+.DS_Store

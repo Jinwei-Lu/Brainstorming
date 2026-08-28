@@ -1,19 +1,39 @@
 {
   "name": "brainstorming-tree",
   "version": "0.1.0",
-  "description": "Brainstorming Tree plugin",
+  "description": "Lightweight Codex plugin for durable, MCTS-inspired brainstorming. It persists ideas as an auditable tree so long-running LLM discussions survive context loss and interference.",
   "author": {
-    "name": "Local developer"
+    "name": "Jinwei Lu",
+    "url": "https://github.com/Jinwei-Lu"
   },
+  "homepage": "https://github.com/Jinwei-Lu/Brainstorming",
+  "repository": "https://github.com/Jinwei-Lu/Brainstorming",
+  "license": "MIT",
+  "keywords": [
+    "brainstorming",
+    "idea-tree",
+    "mcts",
+    "llm",
+    "context-memory",
+    "decision-making"
+  ],
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Brainstorming Tree",
-    "shortDescription": "Use Brainstorming Tree in Codex.",
-    "longDescription": "Brainstorming Tree adds a local Codex plugin scaffold.",
-    "developerName": "Local developer",
+    "shortDescription": "Durable, MCTS-inspired brainstorming",
+    "longDescription": "Moves brainstorming state out of model context into a local, auditable idea tree. Codex can resume long explorations, preserve failed branches, and allocate attention with an evidence-gated MCTS-inspired loop.",
+    "developerName": "Jinwei Lu",
     "category": "Productivity",
-    "capabilities": [],
-    "defaultPrompt": "Help me use Brainstorming Tree."
-  },
-  "mcpServers": "./.mcp.json"
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Jinwei-Lu/Brainstorming",
+    "defaultPrompt": [
+      "把这个问题建成创意树，并从最值得探索的分支开始",
+      "读取现有创意树，继续上次未完成的探索",
+      "审计这棵创意树，找出遗漏、死分支和最强候选"
+    ]
+  }
 }
