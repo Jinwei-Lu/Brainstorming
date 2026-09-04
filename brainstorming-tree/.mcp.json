@@ -2,8 +2,7 @@
   "mcpServers": {
     "brainstorming-tree": {
       "command": "python3",
-      "args": ["-u", "./scripts/idea_tree_server.py"],
-      "cwd": "."
+      "args": ["./scripts/idea_tree_server.py"]
     }
   }
 }
