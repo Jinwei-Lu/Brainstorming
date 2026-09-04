@@ -193,13 +193,24 @@ class ServerTestCase(unittest.TestCase):
         result = self.call("idea_tree_create_tree", title=title, goal=goal)
         return result["tree"]["id"], result["root"]["id"]
 
+    def supersede(
+        self,
+        old_tree_id: str,
+        title: str = "Tree, premise changed",
+        goal: str = "A judgeable goal under the new premise",
+    ) -> tuple[str, str]:
+        """Create the successor of `old_tree_id`; return (tree_id, root_node_id)."""
+        result = self.call(
+            "idea_tree_create_tree", title=title, goal=goal, supersedes=old_tree_id
+        )
+        return result["tree"]["id"], result["root"]["id"]
+
     def make_idea(
         self,
         tree_id: str,
         parent_id: str,
         title: str,
         assumptions: list[str] | None = None,
-        kill_condition: str = "a measurement that retires it",
         **extra: Any,
     ) -> str:
         """Create an `idea` node with a distinct assumption set; return its id."""
@@ -211,28 +222,19 @@ class ServerTestCase(unittest.TestCase):
             title=title,
             content=f"mechanism, effect, and comparator for {title}",
             assumptions=assumptions if assumptions is not None else [f"assumption of {title}"],
-            kill_condition=kill_condition,
             **extra,
         )
         return result["node"]["id"]
 
-    def make_branch(self, tree_id: str, parent_id: str, title: str, **extra: Any) -> str:
-        result = self.call(
-            "idea_node_create",
-            tree_id=tree_id,
-            parent_id=parent_id,
-            kind="branch",
-            title=title,
-            content=f"grouping for {title}",
-            **extra,
-        )
-        return result["node"]["id"]
+    def make_parent(self, tree_id: str, parent_id: str, title: str, **extra: Any) -> str:
+        """A node other ideas hang under. There is no `branch` kind: it is an idea too."""
+        return self.make_idea(tree_id, parent_id, title, **extra)
 
-    def make_siblings(self, count: int, parent_kind: str = "branch") -> tuple[str, str, list[str]]:
-        """Build tree -> branch -> N ideas. Return (tree_id, parent_id, [node_ids])."""
+    def make_siblings(self, count: int, parent_kind: str = "idea") -> tuple[str, str, list[str]]:
+        """Build tree -> parent idea -> N ideas. Return (tree_id, parent_id, [node_ids])."""
         tree_id, root_id = self.make_tree()
         parent_id = (
-            self.make_branch(tree_id, root_id, "Branch") if parent_kind == "branch" else root_id
+            self.make_parent(tree_id, root_id, "Parent") if parent_kind == "idea" else root_id
         )
         names = [chr(ord("A") + index) for index in range(count)]
         node_ids = [self.make_idea(tree_id, parent_id, f"Idea {name}") for name in names]
@@ -260,87 +262,28 @@ class ServerTestCase(unittest.TestCase):
         )
         return result["comparison"]["id"]
 
-    def evaluate(
-        self,
-        tree_id: str,
-        node_id: str,
-        expected_version: int,
-        outcome: str = "supports",
-        rationale: str = "the measurement came out on this side",
-        source: str = "agent",
-        **extra: Any,
-    ) -> dict[str, Any]:
-        return self.call(
-            "idea_evaluate",
-            tree_id=tree_id,
-            node_id=node_id,
-            expected_version=expected_version,
-            outcome=outcome,
-            rationale=rationale,
-            evidence=[{"kind": "experiment", "ref": "run-1", "cost": 1.0}],
-            source=source,
-            **extra,
-        )
-
-    def raise_question(
-        self, tree_id: str, text: str, source: str, kind: str = "question", **extra: Any
-    ) -> dict[str, Any]:
-        return self.call(
-            "idea_question_raise",
-            tree_id=tree_id,
-            kind=kind,
-            text=text,
-            source=source,
-            **extra,
-        )["question"]
-
-    def raise_observation(
-        self,
-        tree_id: str,
-        depends_on: list[str],
-        cost: float,
-        text: str = "run the discriminating measurement",
-        source: str = "inferred",
-    ) -> dict[str, Any]:
-        """An `observation`: the one kind of open item that carries a cost."""
-        return self.raise_question(
-            tree_id,
-            text,
-            source,
-            kind="observation",
-            cost=cost,
-            depends_on=depends_on,
-        )
-
     # -- readers -----------------------------------------------------------
 
-    def select(self, tree_id: str, **extra: Any) -> dict[str, Any]:
-        return self.call("idea_tree_select", tree_id=tree_id, **extra)
+    def snapshot(self, tree_id: str, **extra: Any) -> dict[str, Any]:
+        return self.call("idea_tree_snapshot", tree_id=tree_id, **extra)
 
-    def node(self, tree_id: str, node_id: str) -> dict[str, Any]:
-        return self.call("idea_node_get", tree_id=tree_id, node_id=node_id)
+    def nodes_by_id(self, snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        return {node["id"]: node for node in snapshot["nodes"]}
 
-    def open_questions(self, tree_id: str) -> list[dict[str, Any]]:
-        """The snapshot's one ranked list of open questions, constraints, observations."""
-        return self.call("idea_tree_snapshot", tree_id=tree_id)["open_questions"]
+    def events(self, snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+        """The snapshot's tail of the append-only ledger, oldest first."""
+        return snapshot["recent_events"]
 
-    def frontier_by_node(self, selection: dict[str, Any]) -> dict[str, dict[str, Any]]:
-        """Flatten `ranked_frontier` into node_id -> ranking entry."""
+    def rankings_by_node(self, snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        """Flatten the per-sibling-group `rankings` into node_id -> ranking entry."""
         entries: dict[str, dict[str, Any]] = {}
-        for group in selection["ranked_frontier"]:
+        for group in snapshot["rankings"]:
             for entry in group["nodes"]:
                 entries[entry["node_id"]] = entry
         return entries
-
-    def undominated_ids(self, selection: dict[str, Any]) -> set[str]:
-        return {entry["node_id"] for entry in selection["undominated"]}
 
     def shortlist_by_node(self, payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
         """Flatten the tree-wide `ranked_shortlist` into node_id -> ranking entry."""
         return {
             entry["node_id"]: entry for entry in payload["ranked_shortlist"]["nodes"]
         }
-
-    def dominated_by_node(self, payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
-        """Flatten `dominated` into node_id -> the record of why it was pruned."""
-        return {entry["node_id"]: entry for entry in payload["dominated"]}

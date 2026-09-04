@@ -1,7 +1,7 @@
 {
   "name": "brainstorming-tree",
-  "version": "0.1.0",
-  "description": "Lightweight Agent Plugin for durable, MCTS-inspired brainstorming. It persists ideas as an auditable tree so long-running agent workflows survive context loss and interference.",
+  "version": "0.3.0",
+  "description": "Lightweight Agent Plugin for durable human-AI brainstorming. It persists ideas as an auditable tree so multi-round explorations survive context loss and every judgment is recorded.",
   "author": {
     "name": "Jinwei Lu",
     "url": "https://github.com/Jinwei-Lu"
@@ -14,7 +14,6 @@
     "agent-plugin",
     "agent-skills",
     "idea-tree",
-    "mcts",
     "llm",
     "context-memory",
     "decision-making"
@@ -24,7 +23,7 @@
   "interface": {
     "displayName": "Brainstorming Tree",
     "shortDescription": "Agent-agnostic, durable brainstorming",
-    "longDescription": "Moves brainstorming state out of model context into a local, auditable idea tree. Compatible agents can resume long explorations, preserve failed branches, and allocate attention with an evidence-gated MCTS-inspired loop.",
+    "longDescription": "Moves brainstorming state out of model context into a local, auditable idea tree. The human asks, the agent proposes materially different leaves, the human gives feedback, and every comparison lands in the ledger; sessions resume across context loss.",
     "developerName": "Jinwei Lu",
     "category": "Productivity",
     "capabilities": [
@@ -33,9 +32,9 @@
     ],
     "websiteURL": "https://github.com/Jinwei-Lu/Brainstorming",
     "defaultPrompt": [
-      "把这个问题建成创意树，并从最值得探索的分支开始",
-      "读取现有创意树，继续上次未完成的探索",
-      "审计这棵创意树，找出遗漏、死分支和最强候选"
+      "把这个问题建成创意树，先提两三个实质不同的方向给我看",
+      "读取现有创意树，继续上次的讨论",
+      "读取这棵创意树，告诉我目前最强的候选和它赢在哪条比较上"
     ]
   }
 }

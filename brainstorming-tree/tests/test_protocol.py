@@ -62,15 +62,10 @@ class NotificationTest(unittest.TestCase):
 
 
 class ToolsListTest(unittest.TestCase):
-    def test_tools_list_advertises_exactly_the_sixteen_implemented_handlers(self) -> None:
+    def test_tools_list_advertises_exactly_the_seven_implemented_handlers(self) -> None:
         responses = rpc([request(1, "tools/list")])
         names = [tool["name"] for tool in responses[0]["result"]["tools"]]
-        self.assertEqual(len(names), 16)
-        self.assertNotIn(
-            "idea_observation_register",
-            names,
-            "an observation is a question with a cost, not its own tool",
-        )
+        self.assertEqual(len(names), 7)
         self.assertEqual(sorted(names), sorted(server.HANDLERS))
         self.assertEqual(len(set(names)), len(names), "tool names must be unique")
 
@@ -121,7 +116,7 @@ class BatchTest(unittest.TestCase):
         array = responses[0]
         self.assertIsInstance(array, list)
         self.assertEqual([item["id"] for item in array], [7, 8])
-        self.assertEqual(len(array[1]["result"]["tools"]), 16)
+        self.assertEqual(len(array[1]["result"]["tools"]), 7)
 
     def test_a_batch_of_only_notifications_produces_no_output(self) -> None:
         batch = "[{}, {}]".format(
